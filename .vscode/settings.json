@@ -1,0 +1,8 @@
+{
+    "csharp.inlayHints.parameters.enabled": true,
+    "csharp.inlayHints.types.enabled": true,
+    "omnisharp.enableAsyncCompletion": true,
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.enableImportCompletion": true,
+    "omnisharp.organizeImportsOnFormat": true
+}
