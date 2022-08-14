@@ -8,7 +8,7 @@
 *.sln.docstates
 
 # Build results
-res/config.json/
+res/
 [Dd]ebug/
 [Rr]elease/
 x64/
