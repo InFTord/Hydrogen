@@ -1,5 +1,8 @@
-﻿using DSharpPlus;
+﻿using System.Runtime.CompilerServices;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using Hydrogen.Database;
+using Hydrogen.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +25,7 @@ namespace Hydrogen
             Configuration = configuration!;
 
             IServiceCollection services = new ServiceCollection();
+            services.AddDbContextFactory<DatabaseContext>();
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             DiscordShardedClient client = new(new DiscordConfiguration
@@ -34,17 +38,29 @@ namespace Hydrogen
 #endif
             });
 
+            
+
             IReadOnlyDictionary<int, CommandsNextExtension> commandsNextShards = await client.UseCommandsNextAsync(new CommandsNextConfiguration
             {
-                StringPrefixes = Configuration.GetValue<string[]>("prefixes"),
+                StringPrefixes = Configuration.GetSection("prefixes").Get<string[]>(),
                 Services = serviceProvider
-
             });
 
+            
+
+            foreach (CommandsNextExtension commandsNextExtension in commandsNextShards.Values)
+            {
+                // We'll register our commands automagically using the power of reflection.
+                //  This will automatically register all commands in this project.
+                commandsNextExtension.RegisterCommands(typeof(Program).Assembly);
+                commandsNextExtension.CommandErrored += CommandErrored.CommandErroredAsync;
+            }
+
             await client.StartAsync();
+            await Task.Delay(-1);
         }
 
-        private static IConfiguration? LoadConfiguration(string[] args)
+        public static IConfiguration? LoadConfiguration(string[] args)
         {
             if (Configuration != null)
             {
