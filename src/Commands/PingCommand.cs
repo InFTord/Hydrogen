@@ -49,6 +49,7 @@ namespace Hydrogen.Commands
                 messageBuilder.WithContent($"The tag already exists and is owned by <@{tag.CreatorId}> ({tag.CreatorId}).");
                 messageBuilder.WithAllowedMentions(Mentions.None);
                 await context.RespondAsync(messageBuilder);
+                return;
             }
 
             // Create the tag:
@@ -75,6 +76,20 @@ namespace Hydrogen.Commands
 
             // The use of the formatter class here is completely redundant, but it's here to bring awareness to it's existance and showcases how to use it.
             await context.RespondAsync($"Tag created successfully. You can now use {Formatter.InlineCode($"{context.Prefix}tag {name}")} to use it.");
+        }
+        [Command("info")]
+        [Description("Shows information about tag")]
+        public async Task InfoTagAsync(CommandContext ctx, [RemainingText, Description("the name of the tag")] string tagName) {
+            TagModel? tag = DatabaseContext.Tags.FirstOrDefault(tag => tag.Name == tagName.Trim().ToLowerInvariant() && tag.GuildId == ctx.Guild.Id);
+
+            if (tag == null) {
+                await ctx.RespondAsync("no tag?");
+            }
+
+            DiscordMessageBuilder messageBuilder = new();
+            messageBuilder.WithContent($"Tag name: {tag.Name}\nTag ID: {tag.Id}");
+
+            await ctx.RespondAsync(messageBuilder);
         }
     }
 }

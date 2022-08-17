@@ -38,7 +38,7 @@ namespace Hydrogen
 #endif
             });
 
-            
+
 
             IReadOnlyDictionary<int, CommandsNextExtension> commandsNextShards = await client.UseCommandsNextAsync(new CommandsNextConfiguration
             {
@@ -46,7 +46,7 @@ namespace Hydrogen
                 Services = serviceProvider
             });
 
-            
+
 
             foreach (CommandsNextExtension commandsNextExtension in commandsNextShards.Values)
             {
