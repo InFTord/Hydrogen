@@ -1,4 +1,3 @@
-using System;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -7,7 +6,7 @@ using Npgsql;
 
 namespace Hydrogen.Database
 {
- public sealed class DatabaseContext : DbContext, IDesignTimeDbContextFactory<DatabaseContext>
+    public sealed class DatabaseContext : DbContext, IDesignTimeDbContextFactory<DatabaseContext>
 {
     public DbSet<TagModel> Tags { get; init; } = null!;
     // Required by `dotnet ef`

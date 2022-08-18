@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using Hydrogen.Database;
 using Hydrogen.Events;
@@ -28,7 +27,7 @@ namespace Hydrogen
             services.AddDbContextFactory<DatabaseContext>();
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-            DiscordShardedClient client = new(new DiscordConfiguration
+        DiscordShardedClient client = new(new DiscordConfiguration
             {
                 Token = configuration.GetValue<string>("token"),
 #if DEBUG
