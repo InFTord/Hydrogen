@@ -1,0 +1,14 @@
+{
+    "token": "BOT_TOKEN_HERE",
+    "prefixes": [
+        "h!",
+        "h?"
+    ],
+    "database": {
+        "applicationName": "Bot Name",
+        "host": "localhost",
+        "user": "user",
+        "password": "password",
+        "database": "database"
+    }
+}⏎  
