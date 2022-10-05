@@ -27,7 +27,7 @@ namespace Hydrogen
             services.AddDbContextFactory<DatabaseContext>();
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
-        DiscordShardedClient client = new(new DiscordConfiguration
+            DiscordShardedClient client = new(new DiscordConfiguration
             {
                 Token = configuration.GetValue<string>("token"),
 #if DEBUG
