@@ -6,8 +6,8 @@ namespace Hydrogen.Events
     {
         public static Task CommandErroredAsync(CommandsNextExtension _, CommandErrorEventArgs eventArgs)
         {
-            Console.WriteLine($"Command '{eventArgs.Command.Name}' errored: {eventArgs.Exception}");
-            return eventArgs.Context.RespondAsync($"Bot Error: {eventArgs.Exception}");
+            Console.WriteLine(value: $"Command '{eventArgs.Command.Name}' errored: {eventArgs.Exception}");
+            return eventArgs.Context.RespondAsync(content: $"Bot Error: {eventArgs.Exception} {eventArgs.Exception.Message}");
         }
     }
 }

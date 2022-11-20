@@ -4,5 +4,10 @@
     "omnisharp.enableAsyncCompletion": true,
     "omnisharp.enableRoslynAnalyzers": true,
     "omnisharp.enableImportCompletion": true,
-    "omnisharp.organizeImportsOnFormat": true
+    "omnisharp.organizeImportsOnFormat": true,
+    "omnisharp.dotnetPath": "/home/ubuntu/.dotnet/",
+    "omnisharp.dotNetCliPaths": [
+        "/home/ubuntu/.dotnet"
+    ],
+    "omnisharp.enableMsBuildLoadProjectsOnDemand": true
 }
