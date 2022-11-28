@@ -81,16 +81,13 @@ namespace Hydrogen
 
 
 
-            IReadOnlyDictionary<int, CommandAllExtension> commandsNextShards = await client.UseCommandAllAsync(new CommandAllConfiguration
+            IReadOnlyDictionary<int, CommandAllExtension> commandsNextShards = await client.UseCommandAllAsync(new CommandAllConfiguration(services)
             {
                 // StringPrefixes = Configuration.GetSection("prefixes").Get<string[]>(),
                 // Services = serviceProvider
                 DebugGuildId = 940635246527938620,
-                ServiceCollection = services,
-                
 
             });
-
 
 
             foreach (CommandAllExtension commandsNextExtension in commandsNextShards.Values)
