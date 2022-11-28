@@ -1,6 +1,5 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using Hydrogen.Database;
 using Hydrogen.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +11,11 @@ namespace Hydrogen
         public static IConfiguration Configuration { get; private set; } = null!;
         internal static readonly CancellationTokenSource cancellationTokenSource = new();
         public static CancellationToken cancellationToken = cancellationTokenSource.Token;
-
+        /// <summary>
+        /// Main application class
+        /// </summary>
+        /// <param name="args">Arguments for LoadConfiguration method</param>
+        ///
         public static async Task Main(string[] args)
         {
             IConfiguration? configuration = LoadConfiguration(args);
@@ -24,7 +27,6 @@ namespace Hydrogen
             Configuration = configuration!;
 
             IServiceCollection services = new ServiceCollection();
-            services.AddDbContextFactory<DatabaseContext>();
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
             DiscordShardedClient client = new(new DiscordConfiguration
@@ -59,6 +61,11 @@ namespace Hydrogen
             await Task.Delay(-1);
         }
 
+        /// <summary>
+        /// Loads a configuration file
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        /// <returns>IConfiguration</returns>
         public static IConfiguration? LoadConfiguration(string[] args)
         {
             if (Configuration != null)
