@@ -98,7 +98,7 @@ namespace Hydrogen
                 //  This will automatically register all commands in this project.
                 commandsNextExtension.AddCommands(assembly: typeof(Program).Assembly);
             }
-
+            // Start the bot
             await client.StartAsync();
             await Task.Delay(-1);
         }
