@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OoLunar.DSharpPlus.CommandAll;
+using OoLunar.DSharpPlus.CommandAll.Parsers;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -86,6 +87,7 @@ namespace Hydrogen
                 // StringPrefixes = Configuration.GetSection("prefixes").Get<string[]>(),
                 // Services = serviceProvider
                 DebugGuildId = 940635246527938620,
+                PrefixParser = new PrefixParser(Configuration.GetSection("prefixes").Get<string[]>())
 
             });
 
@@ -94,7 +96,7 @@ namespace Hydrogen
             {
                 // We'll register our commands automagically using the power of reflection.
                 //  This will automatically register all commands in this project.
-                commandsNextExtension.AddCommands(typeof(Program).Assembly);
+                commandsNextExtension.AddCommands(assembly: typeof(Program).Assembly);
             }
 
             await client.StartAsync();
