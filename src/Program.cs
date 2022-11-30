@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using DSharpPlus;
+using Hydrogen.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -97,6 +98,8 @@ namespace Hydrogen
                 // We'll register our commands automagically using the power of reflection.
                 //  This will automatically register all commands in this project.
                 commandsNextExtension.AddCommands(assembly: typeof(Program).Assembly);
+                commandsNextExtension.CommandErrored += CommandError.CommandErroredAsync;
+                
             }
             // Start the bot
             await client.StartAsync();
