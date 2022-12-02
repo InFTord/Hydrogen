@@ -1,7 +1,5 @@
 namespace Hydrogen.Events
 {
-
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     public class DiscordEventAttribute : Attribute { }
-
 }
