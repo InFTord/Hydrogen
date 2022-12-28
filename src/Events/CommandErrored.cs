@@ -1,18 +1,20 @@
 using Microsoft.Extensions.Logging;
-using OoLunar.DSharpPlus.CommandAll;
-using OoLunar.DSharpPlus.CommandAll.EventArgs;
+using DSharpPlus.CommandAll;
+using DSharpPlus.CommandAll.EventArgs;
 
 namespace Hydrogen.Events
 {
-    public class CommandError
+    public sealed class CommandError
     {
-        private readonly ILogger<CommandError>? _logger;
+        private readonly ILogger<CommandError> _logger;
 
-        public CommandError(ILogger<CommandError> logger) => _logger = logger;
-        public static Task CommandErroredAsync(CommandAllExtension extension, CommandErroredEventArgs eventArgs)
+        public CommandError(ILogger<CommandError> logger) => _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        [DiscordEvent]
+        public Task CommandErrored(CommandAllExtension extension, CommandErroredEventArgs eventArgs)
         {
             eventArgs.Context.Channel.SendMessageAsync(eventArgs.Exception.Message);
-            logger.LogInformation("test");
+            _logger.LogInformation("test");
             return Task.CompletedTask;
         }
     }

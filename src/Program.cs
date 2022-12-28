@@ -1,11 +1,12 @@
 ﻿using System.Globalization;
+using System.Reflection;
 using DSharpPlus;
 using Hydrogen.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OoLunar.DSharpPlus.CommandAll;
-using OoLunar.DSharpPlus.CommandAll.Parsers;
+using DSharpPlus.CommandAll;
+using DSharpPlus.CommandAll.Parsers;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -14,9 +15,9 @@ namespace Hydrogen
 {
     public class Program
     {
-        public static IConfiguration Configuration { get; private set; } = null!;
-        internal static readonly CancellationTokenSource cancellationTokenSource = new();
-        public static CancellationToken cancellationToken = cancellationTokenSource.Token;
+        private static IConfiguration Configuration { get; set; } = null!;
+        private static readonly CancellationTokenSource CancellationTokenSource = new();
+        public static CancellationToken CancellationToken = CancellationTokenSource.Token;
         /// <summary>
         /// Main application class
         /// </summary>
@@ -32,10 +33,11 @@ namespace Hydrogen
             }
             Configuration = configuration!;
 
-            IServiceCollection services = new ServiceCollection();
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            IServiceCollection serviceCollection = new ServiceCollection();
+            IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
-            services.AddLogging(logger =>
+            serviceCollection.AddSingleton(configuration);
+            serviceCollection.AddLogging(logger =>
 {
     string loggingFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u4}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
 
@@ -69,26 +71,41 @@ namespace Hydrogen
     logger.AddSerilog(loggerConfiguration.CreateLogger());
 });
 
-            DiscordShardedClient client = new(new DiscordConfiguration
+            Assembly currentAssembly = typeof(Program).Assembly;
+            serviceCollection.AddSingleton((serviceProvider) =>
             {
-                Token = configuration.GetValue<string>("token"),
-
-                LoggerFactory = services.BuildServiceProvider().GetRequiredService<ILoggerFactory>(),
-#if DEBUG
-                Intents = DiscordIntents.All
-#else
-                Intents = DiscordIntents.Guilds
-#endif
+                EventManager eventManager = new(serviceProvider);
+                eventManager.GatherEventHandlers(currentAssembly);
+                return eventManager;
             });
 
+            // Register the Discord sharded client to the service collection
+            serviceCollection.AddSingleton((serviceProvider) =>
+            {
+                EventManager eventManager = serviceProvider.GetRequiredService<EventManager>();
+                IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>() ?? throw new ArgumentNullException("serviceProvider.GetRequiredService<IConfiguration>()");
+                DiscordConfiguration discordConfig = new()
+                {
+                    Token = configuration.GetValue<string>("token"),
+                    Intents = DiscordIntents.DirectMessages | DiscordIntents.GuildMembers | DiscordIntents.GuildMessages | DiscordIntents.Guilds | DiscordIntents.MessageContents,
+                    LoggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>()
+                };
 
+                DiscordShardedClient shardedClient = new(discordConfig);
+                eventManager.RegisterEventHandlers(shardedClient);
+                return shardedClient;
+            });
 
-            IReadOnlyDictionary<int, CommandAllExtension> commandsNextShards = await client.UseCommandAllAsync(new CommandAllConfiguration(services)
+            ServiceProvider services = serviceCollection.BuildServiceProvider();
+            DiscordShardedClient shardedClient = services.GetRequiredService<DiscordShardedClient>();
+            EventManager eventManager = services.GetRequiredService<EventManager>();
+
+            IReadOnlyDictionary<int, CommandAllExtension> commandsNextShards = await shardedClient.UseCommandAllAsync(new CommandAllConfiguration(serviceCollection)
             {
                 // StringPrefixes = Configuration.GetSection("prefixes").Get<string[]>(),
                 // Services = serviceProvider
                 DebugGuildId = 940635246527938620,
-                PrefixParser = new PrefixParser(Configuration.GetSection("prefixes").Get<string[]>())
+                PrefixParser = new PrefixParser(Configuration.GetSection("prefixes").Get<string[]>() ?? throw new InvalidOperationException())
 
             });
 
@@ -97,13 +114,13 @@ namespace Hydrogen
             {
                 // We'll register our commands automagically using the power of reflection.
                 //  This will automatically register all commands in this project.
-                commandsNextExtension.AddCommands(assembly: typeof(Program).Assembly);
-                commandsNextExtension.CommandErrored += CommandError.CommandErroredAsync;
+                commandsNextExtension.AddCommands(currentAssembly);
+                eventManager.RegisterEventHandlers(commandsNextExtension);
 
             }
-            
+
             // Start the bot
-            await client.StartAsync();
+            await shardedClient.StartAsync();
             await Task.Delay(-1);
         }
 
@@ -112,7 +129,7 @@ namespace Hydrogen
         /// </summary>
         /// <param name="args">Command line arguments</param>
         /// <returns>IConfiguration</returns>
-        public static IConfiguration? LoadConfiguration(string[] args)
+        private static IConfiguration? LoadConfiguration(string[] args)
         {
             if (Configuration != null)
             {

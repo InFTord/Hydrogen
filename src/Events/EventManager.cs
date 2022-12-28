@@ -5,11 +5,11 @@ namespace Hydrogen.Events
 {
     public sealed class EventManager
     {
-        private readonly IServiceProvider ServiceProvider;
+        private readonly IServiceProvider _serviceProvider;
 
-        private readonly List<MethodInfo> EventHandlers = new();
+        private readonly List<MethodInfo> _eventHandlers = new();
 
-        public EventManager(IServiceProvider serviceProvider) => ServiceProvider = serviceProvider;
+        public EventManager(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
         public void GatherEventHandlers(Assembly assembly)
         {
@@ -24,7 +24,7 @@ namespace Hydrogen.Events
                 {
                     if (methodInfo.GetCustomAttribute<DiscordEventAttribute>() is not null)
                     {
-                        EventHandlers.Add(methodInfo);
+                        _eventHandlers.Add(methodInfo);
                     }
                 }
             }
@@ -39,13 +39,13 @@ namespace Hydrogen.Events
 
             foreach (EventInfo eventInfo in obj.GetType().GetEvents(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static))
             {
-                foreach (MethodInfo methodInfo in EventHandlers)
+                foreach (MethodInfo methodInfo in _eventHandlers)
                 {
                     if (eventInfo.EventHandlerType!.GetGenericArguments().SequenceEqual(methodInfo.GetParameters().Select(parameter => parameter.ParameterType)))
                     {
                         Delegate handler = methodInfo.IsStatic
                             ? Delegate.CreateDelegate(eventInfo.EventHandlerType, methodInfo)
-                            : Delegate.CreateDelegate(eventInfo.EventHandlerType, ActivatorUtilities.CreateInstance(ServiceProvider, methodInfo.DeclaringType!), methodInfo);
+                            : Delegate.CreateDelegate(eventInfo.EventHandlerType, ActivatorUtilities.CreateInstance(_serviceProvider, methodInfo.DeclaringType!), methodInfo);
 
                         eventInfo.AddEventHandler(obj, handler);
                     }
